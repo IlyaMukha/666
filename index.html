@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Счётчик</title>
+<link rel="icon" type="image/png" href="znak.ico">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+
+            background: #000;
+            color: #fff;
+
+            font-family: Arial, sans-serif;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: url(fon.jpg);
+             background-size: cover;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+
+            background: rgba(0, 0, 0, 0.45);
+
+            z-index: 0;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 1;
+        }
+
+        .counter {
+            font-size: clamp(25px, 3vw, 90px);
+            font-weight: 700;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .time {
+            margin-top: 40px;
+            font-size: clamp(25px, 4vw, 70px);
+            font-weight: 300;
+            font-variant-numeric: tabular-nums;
+            opacity: 0.7;
+        }
+        .text{
+            font-size: clamp(50px, 9vw, 180px);
+            text-shadow: 0 0 30px #FF0000;
+        }
+        .img{
+            width: clamp(50px, 9vw, 180px);
+            height: clamp(50px, 9vw, 180px);
+        }
+        .ps{
+            font-size: 24px;
+            position: absolute;
+            right: clamp(5px, 1vw, 10px);
+            bottom: clamp(5px, 1vw, 10px);
+        }
+        .background-video {
+            position: fixed;
+
+            top: 0;
+            left: 0;
+
+            width: 100vw;
+            height: 100vh;
+
+            object-fit: fill;
+
+            z-index: -2;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+     <video class="background-video" autoplay muted loop playsinline>
+        <source src="IMG_6173.MP4" type="video/mp4">
+    </video>
+    <div class="counter" id="counter">5 лет 6 месяцев 10 дней</div>
+    <div class="text">Без секса <img src="znak.png" class="img"></div>
+    <div class="time" id="time">00:00:00</div>
+    <div class="ps">Личный рекорд Кусонского Тимофея Павловича</div>
+
+</div>
+
+<script>
+
+    // Дата начала отсчёта.
+    // ЗДЕСЬ ПОТОМ УКАЗЫВАЕМ НУЖНУЮ ДАТУ.
+    const startDate = new Date("2021-02-05T00:00:00");
+    function plural(number, one, few, many) {
+        const mod10 = number % 10;
+        const mod100 = number % 100;
+
+        if (mod10 === 1 && mod100 !== 11) {
+            return one;
+        }
+
+        if (
+            mod10 >= 2 &&
+            mod10 <= 4 &&
+            (mod100 < 10 || mod100 >= 20)
+        ) {
+            return few;
+        }
+
+        return many;
+    }
+
+    function updateCounter() {
+
+        const now = new Date(); //2026, 1, 1, 23, 59, 30
+
+        let years = now.getFullYear() - startDate.getFullYear();
+        let months = now.getMonth() - startDate.getMonth();
+        let days = now.getDate() - startDate.getDate();
+
+        // Если день месяца ещё не наступил,
+        // уменьшаем количество месяцев на один.
+        if (days < 0) {
+            months--;
+
+            const previousMonth = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                0
+            );
+
+            days += previousMonth.getDate();
+        }
+
+        // Если месяцев получилось меньше нуля,
+        // уменьшаем год.
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+
+        document.getElementById("counter").textContent =
+            `${years} ${plural(years, "год", "года", "лет")} ` +
+            `${months} ${plural(months, "месяц", "месяца", "месяцев")} ` +
+            `${days} ${plural(days, "день", "дня", "дней")}`;
+
+
+        // Время внутри текущего дня
+        let lastYear = new Date(startDate);
+        lastYear.setFullYear(startDate.getFullYear() + years);
+        lastYear.setMonth(startDate.getMonth() + months);
+        lastYear.setDate(startDate.getDate() + days);
+
+        const diff = now - lastYear;
+
+        const totalSeconds = Math.floor(diff / 1000);
+
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        document.getElementById("time").textContent =
+            `${String(hours).padStart(2, "0")}:` +
+            `${String(minutes).padStart(2, "0")}:` +
+            `${String(seconds).padStart(2, "0")}`;
+    }
+
+    updateCounter();
+
+    setInterval(updateCounter, 1000);
+
+</script>
+
+</body>
+</html>
